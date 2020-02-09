@@ -81,10 +81,11 @@ while choosing_clips:
 
             chosen_clips.append((clip_start, clip_end))
 
+            # The bitrate won't go higher than the source file, but has to be put high to achieve max quality output
             clip.write_videofile(
                 functions.video_output_path.replace(
                     clip_filename, 
-                    "clip {0} ({1}-{2}) {3}".format(len(chosen_clips), clip_start, clip_end, clip_filename)))
+                    "clip {0} ({1}-{2}) {3}".format(len(chosen_clips), clip_start, clip_end, clip_filename)), bitrate="12000k")
 
 
 # Startfile only works in Windows
