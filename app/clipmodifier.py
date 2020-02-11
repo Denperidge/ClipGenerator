@@ -2,6 +2,35 @@ from os import path, name
 from app.functions import log
 import app.functions as functions
 
+def prompt_time():
+    clip_length = input("Length: ").strip()
+    log("debug", "raw clip_length", clip_length)
+
+    try:
+        # If empty value, return False
+        if clip_length == "":
+            return False
+            
+        # If mm:ss
+        elif ":" in clip_length:
+            clip_length_split = clip_length.split(":")
+            minutes = float(clip_length_split[0])
+            seconds = float(clip_length_split[1])
+            clip_length = (minutes * 60) + seconds
+            log("debug", "clip_length (from mm:ss)", clip_length)
+            return clip_length
+        # If seconds
+        else:
+            seconds = float(clip_length)
+            clip_length = seconds
+            log("debug", "clip_length (from seconds)", clip_length)
+            return clip_length
+    except ValueError:
+        # If not empty nor numeric, reprompt recursively
+        print("Please enter an empty value, the desired seconds or a min:sec value (f.e. 5:23)")
+        return prompt_time()        
+
+
 scriptname = path.basename(__file__)
 log(scriptname)
 
@@ -14,24 +43,11 @@ print("Insert desired clip length in mm:ss")
 print("You can make as many clips as liked, leave clip length empty (just press ENTER) to stop making clips")
 
 while choosing_clips:
-    clip_length = input("Length: ").strip()
-    if clip_length == "":
+    clip_length = prompt_time()
+    if clip_length == False:
         log("debug", "clip_length", "\"{0}\", done clipping".format(clip_length))
         choosing_clips = False
     else:
-        log("debug", "clip_length", clip_length)
-        try:
-            clip_length_split = clip_length.split(":")
-            minutes = float(clip_length_split[0])
-            seconds = float(clip_length_split[1])
-            clip_length = (minutes * 60) + seconds
-        except IndexError:
-            # If no : is used, assume seconds
-            seconds = float(clip_length)
-            clip_length = seconds
-        except ValueError:
-            print("Please enter an empty value or a proper min:second value (f.e. 5:23)")
-            
         from random import uniform
         from moviepy.editor import *
         full_video = VideoFileClip(functions.video_output_path)
