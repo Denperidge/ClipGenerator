@@ -2,17 +2,28 @@ from os import path, name
 from app.functions import log
 import app.functions as functions
 
-modes = ["random", "exact"]
+class Mode:
+    def __init__(self, name, clip_length_promp, second_clip_length_promp=None):
+        self.name = name
+        self.clip_length_promp = clip_length_promp
+        if second_clip_length_promp is not None:
+            self.second_clip_length_promp = second_clip_length_promp
+
+
+random = Mode("random", "Length: ")
+exact = Mode("exact", "Start time: ", "End time: ")
 def prompt_mode():
-    selected_mode = input("1: {0} 2: {1}: ".format(modes[0], modes[1])).lower().strip()
-    if selected_mode == "1" or selected_mode == "2":
-        return modes[int(selected_mode) - 1]
+    selected_mode = input("1: {0} 2: {1}: ".format(random.name, exact.name)).lower().strip()
+    if selected_mode == "1":
+        return random
+    elif selected_mode == "2":
+        return exact
     else:
         return prompt_mode()
 
 
-def prompt_time():
-    clip_length = input("Length: ").strip()
+def prompt_time(clip_length_prompt):
+    clip_length = input(clip_length_prompt).strip()
     log("debug", "raw clip_length", clip_length)
 
     try:
@@ -37,7 +48,7 @@ def prompt_time():
     except ValueError:
         # If not empty nor numeric, reprompt recursively
         print("Please enter an empty value, the desired seconds or a min:sec value (f.e. 5:23)")
-        return prompt_time()
+        return prompt_time(clip_length_prompt)
 
 def random_subclip(clip_length):
     # Check if there's enough space in the video to get clip from
@@ -58,9 +69,6 @@ def random_subclip(clip_length):
                     
         else:
             for chosen_clip in chosen_clips:
-                #print(chosen_clip)
-                #print(str(clip_start) + " " + str(clip_end))
-                    
                 if not chosen_clip[0] < clip_start < chosen_clip[1] and not chosen_clip[0] < clip_end < chosen_clip[1]:
                     clip_start_and_end_chosen = True
                     break
@@ -69,7 +77,7 @@ def random_subclip(clip_length):
     return clip_start, clip_end
 
 def exact_subclip(clip_start):
-    clip_end = prompt_time()
+    clip_end = prompt_time(mode.second_clip_length_promp)
     return clip_start, clip_end
 
 
@@ -82,13 +90,13 @@ choosing_clips = True
 chosen_clips = []
 
 print("Do you want to generate random clips, or set a specific start and endtime?")
-mode, time_prompt = prompt_mode()
+mode = prompt_mode()
 
-print("Insert desired clip {0} in mm:ss or seconds".format("length" if mode == modes[0] else "start"))
+print("Insert desired clip {0} in mm:ss or seconds".format("length" if mode == random else "start"))
 print("You can make as many clips as liked, leave clip length empty (just press ENTER) to stop making clips")
 
 while choosing_clips:
-    clip_length_or_start = prompt_time()
+    clip_length_or_start = prompt_time(mode.clip_length_promp)
     if clip_length_or_start == False:  # If no value returned, finish clipping
         log("debug", "clip_length_or_start", "\"{0}\", done clipping".format(clip_length_or_start))
         choosing_clips = False
@@ -100,9 +108,9 @@ while choosing_clips:
         log("debug", "full_duration", full_duration)
     
 
-        if mode == modes[0]:
+        if mode == random:
             clip_start, clip_end = random_subclip(clip_length_or_start)
-        elif mode == modes[1]:
+        elif mode == exact:
             clip_start, clip_end = exact_subclip(clip_length_or_start)
         
         log("debug", "clip_start", clip_start)
