@@ -141,7 +141,7 @@ while choosing_clips:
 # Startfile only works in Windows
 if name == "nt":
     from os import startfile
-    log("debug", "os", "\"{0}\", opening explorer")
+    log("debug", "os", "Windows, opening output in explorer")
     startfile(path.realpath(functions.video_output_dir))
 
 log("debug", "status", "done")
