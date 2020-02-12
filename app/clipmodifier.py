@@ -117,11 +117,13 @@ while choosing_clips:
 
         clip = full_video.subclip(clip_start, clip_end)
 
-        print("The application will now show the first 5 and last 5 seconds of the clip")
-
-        
-        clip.subclip(0, 5).preview()
-        clip.subclip(clip.duration - 5, clip.duration).preview()
+        if (clip_end - clip_start) >= 5:
+            print("The application will now show the first 5 and last 5 seconds of the clip")
+            clip.subclip(0, 5).preview()
+            clip.subclip(clip.duration - 5, clip.duration).preview()
+        else:
+            print("Since this is a short clip, it will be viewed in it's entirety")
+            clip.preview()
 
 
         clip_approved = input("Is this clip good? (y or empty if Yes, n if no): ").lower().strip()
