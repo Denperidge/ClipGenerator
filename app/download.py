@@ -1,5 +1,5 @@
 from os import path, rename
-import youtube_dl
+from youtube_dl import YoutubeDL, DownloadError
 from app.functions import log
 import app.functions as functions
 from re import sub
@@ -24,9 +24,7 @@ def ydl_hook(d):
         log("debug", "ydl_hook_finished", str(d))
 
 
-def main():
-    video_filename = None
-        
+def main():  
     scriptname = path.basename(__file__)
     log(scriptname)
 
@@ -42,7 +40,7 @@ def main():
     }
     log("debug", "ydl_opts", ydl_opts)
 
-    with youtube_dl.YoutubeDL(ydl_opts) as ydl:
+    with YoutubeDL(ydl_opts) as ydl:
         try:
             info = ydl.extract_info(youtube_link)
 
@@ -66,5 +64,5 @@ def main():
             log("debug", "video_output_dir", functions.video_output_dir)
             log("debug", "video_output_path", functions.video_output_path)
 
-        except youtube_dl.DownloadError as e:
+        except DownloadError as e:
             log("error", "DownloadError", e)

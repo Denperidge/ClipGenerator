@@ -1,7 +1,7 @@
 from os import path, name
 from app.functions import log
 import app.functions as functions
-import threading
+from threading import Thread
 
 class Mode:
     def __init__(self, name, clip_length_promp, second_clip_length_promp=None):
@@ -140,9 +140,9 @@ def main():
                 clip_path = functions.video_output_path.replace(
                     clip_filename, "clip {0} ({1}-{2}) {3}".format(len(chosen_clips), clip_start, clip_end, clip_filename))
                 
-                x = threading.Thread(target=write_video, args=(clip, clip_path))
-                x.start()
-                print("Writing...")
+                write_videofile = Thread(target=write_video, args=(clip, clip_path))
+                print("Clip selected, writing in the background. Feel free to continue making clips!")
+                write_videofile.start()
 
 
     # Startfile only works in Windows
