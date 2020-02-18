@@ -1,6 +1,7 @@
 from os import path, name
 from app.functions import log
 import app.functions as functions
+import threading
 
 class Mode:
     def __init__(self, name, clip_length_promp, second_clip_length_promp=None):
@@ -50,7 +51,8 @@ def prompt_time(clip_length_prompt):
         print("Please enter an empty value, the desired seconds or a min:sec value (f.e. 5:23)")
         return prompt_time(clip_length_prompt)
 
-def random_subclip(clip_length):
+def random_subclip(clip_length, chosen_clips, full_duration):
+    from random import uniform
     # Check if there's enough space in the video to get clip from
     subclip_attempts = 0
     allowed_subclip_attempts = 100  # How many times there can be searched for more subclip space before giving up
@@ -76,73 +78,77 @@ def random_subclip(clip_length):
     
     return clip_start, clip_end
 
-def exact_subclip(clip_start):
+def exact_subclip(mode, clip_start):
     clip_end = prompt_time(mode.second_clip_length_promp)
     return clip_start, clip_end
 
+def write_video(clip, filename):
+    # The bitrate won't go higher than the source file, but has to be put high to achieve max quality output
+    clip.write_videofile(filename, bitrate="12000k", threads=2, logger=None)
 
-scriptname = path.basename(__file__)
-log(scriptname)
+def main():
+    scriptname = path.basename(__file__)
+    log(scriptname)
 
-log("debug", "functions.video_output_path", functions.video_output_path)
+    log("debug", "functions.video_output_path", functions.video_output_path)
 
-choosing_clips = True
-chosen_clips = []
+    choosing_clips = True
+    chosen_clips = []
 
-print("Do you want to generate random clips, or set a specific start and endtime?")
-mode = prompt_mode()
+    print("Do you want to generate random clips, or set a specific start and endtime?")
+    mode = prompt_mode()
 
-print("Insert desired clip {0} in mm:ss or seconds".format("length" if mode == random else "start"))
-print("You can make as many clips as liked, leave clip length empty (just press ENTER) to stop making clips")
+    print("Insert desired clip {0} in mm:ss or seconds".format("length" if mode == random else "start"))
+    print("You can make as many clips as liked, leave clip length empty (just press ENTER) to stop making clips")
 
-while choosing_clips:
-    clip_length_or_start = prompt_time(mode.clip_length_promp)
-    if clip_length_or_start == False:  # If no value returned, finish clipping
-        log("debug", "clip_length_or_start", "\"{0}\", done clipping".format(clip_length_or_start))
-        choosing_clips = False
-    else:
-        from random import uniform
-        from moviepy.editor import VideoFileClip
-        full_video = VideoFileClip(functions.video_output_path)
-        full_duration = full_video.duration
-        log("debug", "full_duration", full_duration)
-
-        if mode == random:
-            clip_start, clip_end = random_subclip(clip_length_or_start)
-        elif mode == exact:
-            clip_start, clip_end = exact_subclip(clip_length_or_start)
-        
-        log("debug", "clip_start", clip_start)
-        log("debug", "clip_end", clip_end)
-
-        clip = full_video.subclip(clip_start, clip_end)
-
-        if (clip_end - clip_start) >= 5:
-            print("The application will now show the first 5 and last 5 seconds of the clip")
-            clip.subclip(0, 5).preview()
-            clip.subclip(clip.duration - 5, clip.duration).preview()
+    while choosing_clips:
+        clip_length_or_start = prompt_time(mode.clip_length_promp)
+        if clip_length_or_start == False:  # If no value returned, finish clipping
+            log("debug", "clip_length_or_start", "\"{0}\", done clipping".format(clip_length_or_start))
+            choosing_clips = False
         else:
-            print("Since this is a short clip, it will be viewed in it's entirety")
-            clip.preview()
+            from moviepy.editor import VideoFileClip
+            full_video = VideoFileClip(functions.video_output_path)
+            full_duration = full_video.duration
+            log("debug", "full_duration", full_duration)
+
+            if mode == random:
+                clip_start, clip_end = random_subclip(clip_length_or_start, chosen_clips, full_duration)
+            elif mode == exact:
+                clip_start, clip_end = exact_subclip(mode, clip_length_or_start)
+            
+            log("debug", "clip_start", clip_start)
+            log("debug", "clip_end", clip_end)
+
+            clip = full_video.subclip(clip_start, clip_end)
+
+            if (clip_end - clip_start) >= 5:
+                print("The application will now show the first 5 and last 5 seconds of the clip")
+                clip.subclip(0, 5).preview()
+                clip.subclip(clip.duration - 5, clip.duration).preview()
+            else:
+                print("Since this is a short clip, it will be viewed in it's entirety")
+                clip.preview()
 
 
-        clip_approved = input("Is this clip good? (y or empty if Yes, n if no): ").lower().strip()
-        if clip_approved in ["", "y", "ye", "yes", "ys"]:
-            clip_filename = path.splitext(path.basename(functions.video_output_path))[0]
+            clip_approved = input("Is this clip good? (y or empty if Yes, n if no): ").lower().strip()
+            if clip_approved in ["", "y", "ye", "yes", "ys"]:
+                clip_filename = path.splitext(path.basename(functions.video_output_path))[0]
 
-            chosen_clips.append((clip_start, clip_end))
+                chosen_clips.append((clip_start, clip_end))
 
-            # The bitrate won't go higher than the source file, but has to be put high to achieve max quality output
-            clip.write_videofile(
-                functions.video_output_path.replace(
-                    clip_filename, 
-                    "clip {0} ({1}-{2}) {3}".format(len(chosen_clips), clip_start, clip_end, clip_filename)), bitrate="12000k", threads=2)
+                clip_path = functions.video_output_path.replace(
+                    clip_filename, "clip {0} ({1}-{2}) {3}".format(len(chosen_clips), clip_start, clip_end, clip_filename))
+                
+                x = threading.Thread(target=write_video, args=(clip, clip_path))
+                x.start()
+                print("Writing...")
 
 
-# Startfile only works in Windows
-if name == "nt":
-    from os import startfile
-    log("debug", "os", "Windows, opening output in explorer")
-    startfile(path.realpath(functions.video_output_dir))
+    # Startfile only works in Windows
+    if name == "nt":
+        from os import startfile
+        log("debug", "os", "Windows, opening output in explorer")
+        startfile(path.realpath(functions.video_output_dir))
 
-log("debug", "status", "done")
+    log("debug", "status", "done")
