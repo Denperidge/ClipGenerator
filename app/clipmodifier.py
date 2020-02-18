@@ -61,7 +61,7 @@ def random_subclip(clip_length, chosen_clips, full_duration):
     else:
         clip_start_and_end_chosen = True
         clip_start = round(uniform(0, full_duration - clip_length), 2)
-        clip_end = clip_start + clip_length
+        clip_end = round(clip_start + clip_length, 2)
     
     in_between_clips = False
     while not clip_start_and_end_chosen:
@@ -81,9 +81,6 @@ def random_subclip(clip_length, chosen_clips, full_duration):
         if not in_between_clips:
             clip_start_and_end_chosen = True
         subclip_attempts += 1
-    
-    print("Chosen clips: ")
-    print(chosen_clips)
     
     return clip_start, clip_end
 
