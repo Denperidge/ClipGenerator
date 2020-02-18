@@ -162,6 +162,7 @@ def main():
     print("Making sure all clips are finished writing")
     
     for i in range(0, len(threads)):
+        print("Waiting for thread {0}...".format(i))
         threads[i].join()
         print("Thread {0} done!".format(i))
 
