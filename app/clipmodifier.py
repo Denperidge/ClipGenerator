@@ -103,7 +103,9 @@ def main():
 
     while choosing_clips:
         clip_length_or_start = prompt_time(mode.clip_length_promp)
-        if clip_length_or_start == False:  # If no value returned, finish clipping
+        # If no value returned, finish clipping
+        # Do note: 0 is also a False value, so double check that the clip_length_or_start isn't 0 when stopping the clipping process
+        if clip_length_or_start == False and str(clip_length_or_start) != str(float(0)):
             log("debug", "clip_length_or_start", "\"{0}\", done clipping".format(clip_length_or_start))
             choosing_clips = False
         else:
