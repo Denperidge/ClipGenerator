@@ -55,26 +55,35 @@ def random_subclip(clip_length, chosen_clips, full_duration):
     from random import uniform
     # Check if there's enough space in the video to get clip from
     subclip_attempts = 0
-    allowed_subclip_attempts = 100  # How many times there can be searched for more subclip space before giving up
-    clip_start_and_end_chosen = False
+    allowed_subclip_attempts = 100000  # How many times there can be searched for more subclip space before giving up
+    if len(chosen_clips) != 0:
+        clip_start_and_end_chosen = False
+    else:
+        clip_start_and_end_chosen = True
+        clip_start = round(uniform(0, full_duration - clip_length), 2)
+        clip_end = clip_start + clip_length
+    
+    in_between_clips = False
     while not clip_start_and_end_chosen:
         if subclip_attempts >= allowed_subclip_attempts:
             log("warning", "exit", "No more subclips possible")
             input("No more subclips possible! Tried {0} times. Press ENTER to exit".format(subclip_attempts))
-            exit()
+            return False, False
 
         clip_start = round(uniform(0, full_duration - clip_length), 2)
         clip_end = clip_start + clip_length
-
-        if len(chosen_clips) == 0:
+        
+        for chosen_clip in chosen_clips:
+            if (chosen_clip[0] < clip_start < chosen_clip[1]) or (chosen_clip[0] < clip_end < chosen_clip[1]):
+                in_between_clips = True
+                continue
+        
+        if not in_between_clips:
             clip_start_and_end_chosen = True
-                    
-        else:
-            for chosen_clip in chosen_clips:
-                if not chosen_clip[0] < clip_start < chosen_clip[1] and not chosen_clip[0] < clip_end < chosen_clip[1]:
-                    clip_start_and_end_chosen = True
-                    break
-            subclip_attempts += 1
+        subclip_attempts += 1
+    
+    print("Chosen clips: ")
+    print(chosen_clips)
     
     return clip_start, clip_end
 
@@ -94,6 +103,8 @@ def main():
 
     choosing_clips = True
     chosen_clips = []
+
+    threads = []
 
     print("Do you want to generate random clips, or set a specific start and endtime?")
     mode = prompt_mode()
@@ -116,6 +127,10 @@ def main():
 
             if mode == random:
                 clip_start, clip_end = random_subclip(clip_length_or_start, chosen_clips, full_duration)
+                if clip_start == False or clip_end == False:
+                    # If no valid clip could be found, prompt again
+                    continue
+
             elif mode == exact:
                 clip_start, clip_end = exact_subclip(mode, clip_length_or_start)
             
@@ -145,7 +160,13 @@ def main():
                 write_videofile = Thread(target=write_video, args=(clip, clip_path))
                 print("Clip selected, writing in the background. Feel free to continue making clips!")
                 write_videofile.start()
+                threads.append(write_videofile)
 
+    print("Making sure all clips are finished writing")
+    
+    for i in range(0, len(threads)):
+        threads[i].join()
+        print("Thread {0} done!".format(i))
 
     # Startfile only works in Windows
     if name == "nt":
