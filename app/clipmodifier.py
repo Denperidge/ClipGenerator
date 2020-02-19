@@ -52,36 +52,51 @@ def prompt_time(clip_length_prompt):
         return prompt_time(clip_length_prompt)
 
 def random_subclip(clip_length, chosen_clips, full_duration):
-    from random import uniform
-    # Check if there's enough space in the video to get clip from
-    subclip_attempts = 0
-    allowed_subclip_attempts = 100000  # How many times there can be searched for more subclip space before giving up
-    if len(chosen_clips) != 0:
-        clip_start_and_end_chosen = False
-    else:
-        clip_start_and_end_chosen = True
-        clip_start = round(uniform(0, full_duration - clip_length), 2)
-        clip_end = round(clip_start + clip_length, 2)
-    
-    in_between_clips = False
-    while not clip_start_and_end_chosen:
-        if subclip_attempts >= allowed_subclip_attempts:
-            log("warning", "exit", "No more subclips possible")
-            input("No more subclips possible! Tried {0} times. Press ENTER to exit".format(subclip_attempts))
-            return False, False
+    from random import randint, uniform
 
+    if len(chosen_clips) < 1:
         clip_start = round(uniform(0, full_duration - clip_length), 2)
         clip_end = clip_start + clip_length
-        
-        for chosen_clip in chosen_clips:
-            if (chosen_clip[0] < clip_start < chosen_clip[1]) or (chosen_clip[0] < clip_end < chosen_clip[1]):
-                in_between_clips = True
-                continue
-        
-        if not in_between_clips:
-            clip_start_and_end_chosen = True
-        subclip_attempts += 1
+        return clip_start, clip_end
+
+
+    chosen_clips.sort()  # Sort chosen clips to find free space easier
+    free_space = []  # Sets of values where a clip can be made
+
+    # Check from second 0
+    first_chosen_clip = chosen_clips[0]
+    if first_chosen_clip[0] != 0:
+        free_space.append((0, first_chosen_clip[0]))
     
+    # Check all chosen clips for free space (besides the last one, which is handled in last_chosen_clip)
+    for i in range(0, len(chosen_clips)-1):
+        start_space = chosen_clips[i][1]
+        end_space = chosen_clips[i+1][0]
+        free_space.append((start_space, end_space))
+    
+    # Check from last chosen clip to the end
+    last_chosen_clip = chosen_clips[len(chosen_clips)-1]
+    if last_chosen_clip[1] != full_duration:
+        free_space.append((last_chosen_clip[1], full_duration))
+    
+
+    # Check if clip_length can be met in free space
+    possible_ranges = []
+    for space in free_space:
+        if space[1] - space[0] >= clip_length:
+            possible_ranges.append(space)
+    
+    if len(possible_ranges) < 1:
+        print("No subclip possible with length {0}".format(clip_length))
+        return False, False
+    
+
+    # If at least one possible range is found, select a random range in between one random range
+    start_range, end_range = possible_ranges[randint(0, len(possible_ranges) - 1)]
+
+    clip_start = round(uniform(start_range, end_range - clip_length), 2)
+    clip_end = clip_start + clip_length
+
     return clip_start, clip_end
 
 def exact_subclip(mode, clip_start):
