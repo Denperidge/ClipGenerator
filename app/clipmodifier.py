@@ -167,6 +167,10 @@ def main():
                 if clip_end > full_duration:
                     print("The end of the clip has to be smaller than the video's full duration")
                     continue
+                
+                if clip_end <= clip_start:
+                    print("The end of the clip has to be larger than the start of the clip")
+                    continue
             
             log("debug", "clip_start", clip_start)
             log("debug", "clip_end", clip_end)
