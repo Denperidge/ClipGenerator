@@ -157,9 +157,16 @@ def main():
                 if clip_start == False or clip_end == False:
                     # If no valid clip could be found, prompt again
                     continue
-
             elif mode == exact:
+                if clip_length_or_start > full_duration:
+                    print("The start of the clip has to be smaller than the video's full duration")
+                    continue
+                
                 clip_start, clip_end = exact_subclip(mode, clip_length_or_start)
+                
+                if clip_end > full_duration:
+                    print("The end of the clip has to be smaller than the video's full duration")
+                    continue
             
             log("debug", "clip_start", clip_start)
             log("debug", "clip_end", clip_end)
