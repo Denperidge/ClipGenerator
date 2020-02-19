@@ -1,4 +1,5 @@
 from os import path, rename
+from glob import glob
 from youtube_dl import YoutubeDL, DownloadError
 from app.functions import log
 import app.functions as functions
@@ -51,12 +52,20 @@ def main():
         try:
             info = ydl.extract_info(youtube_link)
 
+            # After download, FFMPEG converts the file depending on the format from ydl_opts
+            # However, this is not consistently to the same format, nor does it appear in prepare_filename
+            # Hence: discover the extension
+
             # output vars are gotten from ydl
-            output_path = ydl.prepare_filename(info)  # output/*-*-*--*-*-*/{videofilename}.webm
+            output_path = ydl.prepare_filename(info)  # output/*-*-*--*-*-*/{videofilename}.{ext}
             output_dirname = path.dirname(output_path)  # output/*-*-*--*-*-*/
-            output_filename = path.basename(output_path) # {videofilename}.webm
-            output_videoname = path.splitext(output_filename)[0]  # {videofilename} (no extension)
-            output_videoname = sub("[^a-zA-Z0-9 \"'-]", "", output_videoname).replace("  ", " ")  # Clean filename
+
+            output_videoname = path.splitext(path.basename(output_path))[0]  # {videofilename} (no ext)
+            output_filename = path.basename(
+                glob(path.join(output_dirname, output_videoname + "*"))[0])  # {videofilename}.{ext}
+            
+
+            output_videoname = sub("[^a-zA-Z0-9 \"'-]", "", output_videoname).replace("  ", " ")  # Clean filename for use in folder name
 
             # Create new dirname for video file
             new_video_output_dir = functions.video_output_dir.replace(
