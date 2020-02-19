@@ -54,6 +54,10 @@ def prompt_time(clip_length_prompt):
 def random_subclip(clip_length, chosen_clips, full_duration):
     from random import randint, uniform
 
+    if clip_length > full_duration:
+        print("Please insert a clip length that is smaller than the full video's duration")
+        return False, False
+
     if len(chosen_clips) < 1:
         clip_start = round(uniform(0, full_duration - clip_length), 2)
         clip_end = clip_start + clip_length
