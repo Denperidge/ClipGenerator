@@ -28,8 +28,14 @@ def main():
     scriptname = path.basename(__file__)
     log(scriptname)
 
+    youtube_link = None
+    while youtube_link == None:
+        value = input("Link to YT video: ")
+        if "youtube.com/watch?v=" in value or "youtu.be/" in value:
+            youtube_link = value
+        else:
+            print("{0} is not a valid youtube url".format(value))
 
-    youtube_link = input("Link to YT video: ")
     log("debug", "youtube_link", youtube_link)
 
     ydl_opts = {
@@ -40,6 +46,7 @@ def main():
     }
     log("debug", "ydl_opts", ydl_opts)
 
+    print("Downloading...")
     with YoutubeDL(ydl_opts) as ydl:
         try:
             info = ydl.extract_info(youtube_link)
