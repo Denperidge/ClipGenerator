@@ -112,7 +112,7 @@ def write_video(clip, filename):
         # If current format isn't supported, fallback on mp4 with codec mpeg4, which should returner high quality than libx264
         # https://zulko.github.io/moviepy/ref/VideoClip/VideoClip.html?highlight=videofileclip#moviepy.video.VideoClip.VideoClip.write_videofile
         
-        filename_no_ext = filename[:filename.rindex(".") - 1]
+        filename_no_ext = filename[:filename.rindex(".")]
         clip.write_videofile(filename_no_ext + ".mp4", bitrate="12000k", threads=2, logger=None, codec="mpeg4")
 
 def main():
@@ -171,11 +171,12 @@ def main():
             clip_approved = input("Is this clip good? (y or empty if Yes, n if no): ").lower().strip()
             if clip_approved in ["", "y", "ye", "yes", "ys"]:
                 clip_filename, clip_ext = path.splitext(path.basename(functions.video_output_path))
+                # clip_ext includes '.'
 
                 chosen_clips.append((clip_start, clip_end))
 
                 clip_path = functions.video_output_dir +\
-                    "clip {0} ({1}-{2}) {3}.{4}".format(len(chosen_clips), clip_start, clip_end, clip_filename, clip_ext)
+                    "clip {0} ({1}-{2}) {3}{4}".format(len(chosen_clips), clip_start, clip_end, clip_filename, clip_ext)
                 
                 write_videofile = Thread(target=write_video, args=(clip, clip_path))
                 print("Clip selected, writing in the background. Feel free to continue making clips!")
