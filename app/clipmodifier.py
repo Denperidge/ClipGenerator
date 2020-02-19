@@ -2,6 +2,7 @@ from os import path, name
 from app.functions import log
 import app.functions as functions
 from threading import Thread
+from re import sub
 
 class Mode:
     def __init__(self, name, clip_length_promp, second_clip_length_promp=None):
@@ -24,7 +25,9 @@ def prompt_mode():
 
 
 def prompt_time(clip_length_prompt):
-    clip_length = input(clip_length_prompt).strip()
+    clip_length = input(clip_length_prompt)
+    clip_length = sub("[^0-9:.]", "", clip_length)  # Filter out anything non-numeric/':'
+
     log("debug", "raw clip_length", clip_length)
 
     try:
