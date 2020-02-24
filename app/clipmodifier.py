@@ -182,7 +182,7 @@ def main():
                 clip.subclip(0, 5).preview()
                 clip.subclip(clip.duration - 5, clip.duration).preview()
             else:
-                print("Since this is a short clip, it will be viewed in it's entirety")
+                print("Since this is a short clip, it will be viewed in its entirety")
                 clip.preview()
 
 
