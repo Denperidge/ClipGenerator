@@ -14,3 +14,7 @@ Will result in:
 - Make sure FFMPEG is installed and added to path.
 - Use `pip3 install -r requirements.txt` to ensure that all required python packages are installed.
 - Done!
+
+## License
+
+This software is licensed under [MIT](/LICENSE.md), just don't do anything illegal.
