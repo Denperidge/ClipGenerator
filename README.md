@@ -1,5 +1,5 @@
 # ClipGenerator
-A Python script to grab specific or random segments from youtube videos. Simply enter the link, the desired length/start&end, repeat as many times as liked, and done! 
+A Python script to grab specific or random segments from youtube videos. Simply enter the link, the desired start and end (or random clip length), repeat for every clip you want to make, and done!
 
 ## Usage example
 
