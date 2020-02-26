@@ -10,7 +10,7 @@ A Python script to grab specific or random segments from youtube videos. Simply 
 
 ## Usage example
 
-![Gif of example input](/screenshots/demo.gif)
+<img src="/screenshots/demo.gif" alt="Gif of example input" width="600px"/>
 
 Will result in:
 
