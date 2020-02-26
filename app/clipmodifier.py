@@ -5,11 +5,11 @@ from threading import Thread
 from re import sub
 
 class Mode:
-    def __init__(self, name, clip_length_promp, second_clip_length_promp=None):
+    def __init__(self, name, clip_length_prompt, second_clip_length_prompt=None):
         self.name = name
-        self.clip_length_promp = clip_length_promp
-        if second_clip_length_promp is not None:
-            self.second_clip_length_promp = second_clip_length_promp
+        self.clip_length_prompt = clip_length_prompt
+        if second_clip_length_prompt is not None:
+            self.second_clip_length_prompt = second_clip_length_prompt
 
 
 random = Mode("random", "Length: ")
@@ -107,7 +107,7 @@ def random_subclip(clip_length, chosen_clips, full_duration):
     return clip_start, clip_end
 
 def exact_subclip(mode, clip_start):
-    clip_end = prompt_time(mode.second_clip_length_promp)
+    clip_end = prompt_time(mode.second_clip_length_prompt)
     return clip_start, clip_end
 
 def write_video(clip, filename):
@@ -140,7 +140,7 @@ def main():
     print("You can make as many clips as liked, leave clip length empty (just press ENTER) to stop making clips")
 
     while choosing_clips:
-        clip_length_or_start = prompt_time(mode.clip_length_promp)
+        clip_length_or_start = prompt_time(mode.clip_length_prompt)
         # If no value returned, finish clipping
         # Do note: 0 is also a False value, so double check that the clip_length_or_start isn't 0 when stopping the clipping process
         if clip_length_or_start == False and str(clip_length_or_start) != str(float(0)):
