@@ -60,6 +60,7 @@ def main():
             output_path = ydl.prepare_filename(info)  # output/*-*-*--*-*-*/{videofilename}.{ext}
             output_dirname = path.dirname(output_path)  # output/*-*-*--*-*-*/
 
+
             output_videoname = path.splitext(path.basename(output_path))[0]  # {videofilename} (no ext)
             output_filename = path.basename(
                 glob(path.join(output_dirname, output_videoname + "*"))[0])  # {videofilename}.{ext}
@@ -79,6 +80,11 @@ def main():
             log("debug", "output_path", output_path)
             log("debug", "video_output_dir", functions.video_output_dir)
             log("debug", "video_output_path", functions.video_output_path)
+
+            # Write source.txt with original youtube link, title and uploader. Give credit where it's due!
+            with open(new_video_output_dir + "source.txt", "w") as source:
+                for data in [info["title"], info["uploader"], youtube_link]:
+                    source.write(data + "\n")
 
         except DownloadError as e:
             log("error", "DownloadError", e)
