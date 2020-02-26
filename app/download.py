@@ -32,7 +32,7 @@ def main():
     print("(Although the prompt asks for a YT link, a path to a local video file can also be used)")
     youtube_link = None
     while youtube_link == None:
-        value = input("Link to YT video: ")
+        value = input("Link to YT video/path to video file: ")
         # Valid Youtube link
         if "youtube.com/watch?v=" in value or "youtu.be/" in value:
             log("debug", "Mode", "Downloading file from Youtube")
