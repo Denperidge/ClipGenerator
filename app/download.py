@@ -29,13 +29,36 @@ def main():
     scriptname = path.basename(__file__)
     log(scriptname)
 
+    print("(Although the prompt asks for a YT link, a path to a local video file can also be used)")
     youtube_link = None
     while youtube_link == None:
         value = input("Link to YT video: ")
+        # Valid Youtube link
         if "youtube.com/watch?v=" in value or "youtu.be/" in value:
+            log("debug", "Mode", "Downloading file from Youtube")
             youtube_link = value
+
+        # Valid local file
+        elif path.isfile(value):
+            filename = value
+            filedir = path.join(path.dirname(filename), 
+                "Clips {0} {1}\\".format(
+                    path.splitext(path.basename(filename))[0], functions.current_datetime))
+
+            # Move logfile & cleanup
+            rename(functions.video_output_dir, filedir)
+
+            functions.video_output_dir = filedir
+            functions.video_output_path = filename
+            
+            log("debug", "Mode", "Using local file")
+            log("debug", "video_output_dir", functions.video_output_dir)
+            log("debug", "video_output_path", functions.video_output_path)
+
+            return
+
         else:
-            print("{0} is not a valid youtube url".format(value))
+            print("{0} is not a valid youtube url (nor a file on your HDD)".format(value))
 
     log("debug", "youtube_link", youtube_link)
 
