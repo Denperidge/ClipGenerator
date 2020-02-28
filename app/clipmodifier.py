@@ -177,7 +177,7 @@ def main():
 
             clip = full_video.subclip(clip_start, clip_end)
 
-            if (clip_end - clip_start) >= 5:
+            if (clip_end - clip_start) > 10:
                 print("The application will now show the first 5 and last 5 seconds of the clip")
                 clip.subclip(0, 5).preview()
                 clip.subclip(clip.duration - 5, clip.duration).preview()
