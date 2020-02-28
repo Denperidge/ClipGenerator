@@ -1,4 +1,4 @@
-from os import path, rename
+from os import path, rename, name, system
 from glob import glob
 from youtube_dl import YoutubeDL, DownloadError
 from app.functions import log
@@ -55,6 +55,10 @@ def main():
             log("debug", "video_output_dir", functions.video_output_dir)
             log("debug", "video_output_path", functions.video_output_path)
 
+            # Set title in Windows console
+            if name == "nt":
+                system("title {0}".format(path.basename(filename)))
+
             return
 
         else:
@@ -90,6 +94,11 @@ def main():
             
 
             output_videoname = sub("[^a-zA-Z0-9 \"'-]", "", output_videoname).replace("  ", " ")  # Clean filename for use in folder name
+
+            # Set title in Windows console
+            if name == "nt":
+                system("title {0}".format(output_videoname))
+
 
             # Create new dirname for video file
             new_video_output_dir = functions.video_output_dir.replace(
