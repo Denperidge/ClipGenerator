@@ -114,9 +114,13 @@ def main():
             log("debug", "video_output_path", functions.video_output_path)
 
             # Write source.txt with original youtube link, title and uploader. Give credit where it's due!
-            with open(new_video_output_dir + "source.txt", "w") as source:
+            with open(new_video_output_dir + "/../sources.txt", "a+", encoding="utf-8") as sources:
+                line = ""
+                seperator = " - "
                 for data in [info["title"], info["uploader"], youtube_link]:
-                    source.write(data + "\n")
+                    line += data + " - "
+                line = line.strip(seperator)
+                sources.write(line + "\n")
 
         except DownloadError as e:
             log("error", "DownloadError", e)
