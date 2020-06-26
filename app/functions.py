@@ -7,7 +7,7 @@ video_output_dir = ""
 video_output_path = ""
 
 def log(tag, varname=None, varvalue=None):
-    with open(video_output_dir + "logfile.txt", "a+") as log:
+    with open(video_output_dir + "logfile.txt", "a+", encoding="utf-8") as log:
         # If no message (thus division)
         if varname == None:
             log.write("[{0}]\n".format(tag))
